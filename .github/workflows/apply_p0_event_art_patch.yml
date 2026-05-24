@@ -2,6 +2,9 @@ name: Apply P0 event art patch
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/apply_p0_event_art_patch.yml'
 
 permissions:
   contents: write
