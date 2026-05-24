@@ -1,0 +1,222 @@
+name: P0 integrate UI and build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Patch P0 UI integration
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path('app/src/main/java/com/example/MainActivity.kt')
+          text = path.read_text(encoding='utf-8')
+
+          def add_import(import_line, anchor):
+              global text
+              if import_line not in text:
+                  text = text.replace(anchor, anchor + import_line)
+
+          add_import('import androidx.compose.ui.res.painterResource\n', 'import androidx.compose.ui.platform.testTag\n')
+
+          old_event = '''            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(event.description, color = Color(0xFFE5E0D8), fontSize = 14.sp, lineHeight = 20.sp)
+
+                Spacer(modifier = Modifier.height(12.dp))
+'''
+
+          new_event = '''            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                val eventArt = SanguoGallery.eventArts.firstOrNull { art -> event.id == art.id }
+
+                if (eventArt != null) {
+                    Image(
+                        painter = painterResource(id = eventArt.resId),
+                        contentDescription = eventArt.title,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(130.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF111111))
+                    )
+                    Text(
+                        text = eventArt.caption,
+                        color = Color(0xFFD4AF37),
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp
+                    )
+                }
+
+                Text(event.description, color = Color(0xFFE5E0D8), fontSize = 14.sp, lineHeight = 20.sp)
+
+                Spacer(modifier = Modifier.height(12.dp))
+'''
+
+          if new_event not in text:
+              if old_event not in text:
+                  raise SystemExit('EventChoiceDialog target block not found')
+              text = text.replace(old_event, new_event, 1)
+
+          if 'fun AchievementDialog(' not in text:
+              insert_before = '\n// -------------------------------------------------------------\n// UI COMPONENT: EventChoiceDialog (CYOA Events Dialog Popup)\n// -------------------------------------------------------------\n'
+              achievement_dialog = r'''
+// -------------------------------------------------------------
+// DIALOG: AchievementDialog (Sanguo Achievement List)
+// -------------------------------------------------------------
+@Composable
+fun AchievementDialog(viewModel: GameViewModel, onDismiss: () -> Unit) {
+    val achievements = SanguoAchievementEngine.unlockedAchievements(viewModel)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("功业成就", color = Color(0xFFD4AF37), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        },
+        text = {
+            LazyColumn(
+                modifier = Modifier.size(width = 320.dp, height = 420.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(achievements) { ach ->
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF141416)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp)) {
+                            Text(
+                                text = if (ach.unlocked) "已达成：${ach.title}" else "未达成：${ach.title}",
+                                color = if (ach.unlocked) Color(0xFFD4AF37) else Color.Gray,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(ach.description, color = Color.LightGray, fontSize = 12.sp, lineHeight = 16.sp)
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("关闭", color = Color(0xFFD4AF37)) }
+        },
+        containerColor = Color(0xFF1E1E22),
+        shape = RoundedCornerShape(16.dp)
+    )
+}
+'''
+              if insert_before not in text:
+                  raise SystemExit('EventChoiceDialog section marker not found')
+              text = text.replace(insert_before, '\n' + achievement_dialog + insert_before, 1)
+
+          if 'var showAchievementDialog by remember' not in text:
+              text = text.replace('    var activeTab by remember { mutableStateOf(0) }\n', '    var activeTab by remember { mutableStateOf(0) }\n    var showAchievementDialog by remember { mutableStateOf(false) }\n', 1)
+
+          if 'Icons.Default.Star' not in text:
+              old_header = '''                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "公元 $characterYear 年",
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFD4AF37),
+                            fontSize = 16.sp
+                        )
+                        Text(
+                            text = "$characterAge 岁",
+                            color = Color(0xFFE5E0D8).copy(alpha = 0.8f),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+'''
+              new_header = '''                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = { showAchievementDialog = true },
+                            modifier = Modifier.size(34.dp)
+                        ) {
+                            Icon(Icons.Default.Star, contentDescription = "Achievements", tint = Color(0xFFD4AF37), modifier = Modifier.size(20.dp))
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                text = "公元 $characterYear 年",
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFD4AF37),
+                                fontSize = 16.sp
+                            )
+                            Text(
+                                text = "$characterAge 岁",
+                                color = Color(0xFFE5E0D8).copy(alpha = 0.8f),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+'''
+              if old_header not in text:
+                  raise SystemExit('PlayingScreen header block not found')
+              text = text.replace(old_header, new_header, 1)
+
+          if 'if (showAchievementDialog) {' not in text:
+              old_scaffold_end = '''        }
+    }
+}
+
+// -------------------------------------------------------------
+// TAB 0: CHRONOLOGY / YEAR ADVANCE LOGS
+'''
+              new_scaffold_end = '''        }
+    }
+
+    if (showAchievementDialog) {
+        AchievementDialog(viewModel) { showAchievementDialog = false }
+    }
+}
+
+// -------------------------------------------------------------
+// TAB 0: CHRONOLOGY / YEAR ADVANCE LOGS
+'''
+              if old_scaffold_end not in text:
+                  raise SystemExit('PlayingScreen end block not found')
+              text = text.replace(old_scaffold_end, new_scaffold_end, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit P0 UI integration
+        run: |
+          if git diff --quiet; then
+            echo "No integration changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/java/com/example/MainActivity.kt
+          git commit -m "feat: integrate event art and achievement dialog"
+          git push
+
+  build:
+    needs: integrate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Grant Gradle execute permission
+        run: chmod +x ./gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug
