@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# Touch marker: rerun integration workflow after workflow file exists.
 path = Path("app/src/main/java/com/example/ui/GameViewModel.kt")
 text = path.read_text(encoding="utf-8")
 
