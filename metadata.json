@@ -1,0 +1,6 @@
+{
+  "name": "三国人生模拟",
+  "description": "文字卡牌写实风格的三国人生模拟游戏，体验波澜壮阔的一生",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Crossed Sword Left of Safe Zone (Centered at 54,54) -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M32,32 L48,48 L46,50 L30,34 Z" />
+    <path
+        android:fillColor="#CD7F32"
+        android:pathData="M28,28 L34,34 L32,36 L26,30 Z" />
+
+    <!-- Crossed Sword Right of Safe Zone -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M76,32 L60,48 L62,50 L78,34 Z" />
+    <path
+        android:fillColor="#CD7F32"
+        android:pathData="M80,28 L74,34 L76,36 L82,30 Z" />
+
+    <!-- Majestic Warlord Emblem Shield (Encentered in the safe-zone) -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M54,32 C42,32 38,38 38,54 C38,68 54,78 54,78 C54,78 70,68 70,54 C70,38 66,32 54,32 Z" />
+
+    <!-- Inner Shield Crimson Layer -->
+    <path
+        android:fillColor="#8B1A1A"
+        android:pathData="M54,36 C45,36 42,41 42,54 C42,65 54,73 54,73 C54,73 66,65 66,54 C66,41 63,36 54,36 Z" />
+
+    <!-- Gold Dragon / Calligraphy Character '三' Ornament in the center -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M48,46 H60 V48 H48 Z" />
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M46,52 H62 V54 H46 Z" />
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M44,58 H64 V60 H44 Z" />
+
+    <!-- Golden Crown Ornament top of Shield -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M48,27 L54,22 L60,27 L57,32 L51,32 Z" />
+</vector>
