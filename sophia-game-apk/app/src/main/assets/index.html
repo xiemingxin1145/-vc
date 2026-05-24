@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>苏菲亚的调教课程 | Sophia's Private Lessons</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { background: #0f0a0a; color: #f5e8d3; }
+  .elegant-card { background: #1a1412; border: 1px solid #4a3728; }
+  .dialogue-box { background: #2a211c; }
+  .choice-btn { transition: all 0.2s; }
+  .choice-btn:hover { background-color: #4a3728; transform: translateY(-1px); }
+  .cg-img { transition: transform 0.3s; }
+  .cg-img:hover { transform: scale(1.03); }
+</style>
+</head>
+<body class="min-h-screen">
+<div class="max-w-5xl mx-auto p-6">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-4xl font-serif tracking-widest">SUFEIYA</h1>
+      <p class="text-[#c9a37e] text-sm">PRIVATE LESSONS</p>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="text-right">
+        <div class="text-sm text-[#c9a37e]">好感度</div>
+        <div id="affection" class="text-3xl font-bold text-[#e8b070]">35</div>
+      </div>
+      <button onclick="toggleSound()" class="px-4 py-2 text-sm border border-[#4a3728] rounded-lg hover:bg-[#2a211c]">音效 <span id="sound-status">开</span></button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <div class="lg:col-span-3 elegant-card rounded-2xl p-6">
+      <div class="mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-3 h-3 bg-[#e8b070] rounded-full animate-pulse"></div>
+          <span class="text-[#c9a37e] text-sm tracking-[3px]">私密课堂</span>
+        </div>
+        <h2 id="scene-title" class="text-2xl font-serif mt-1">第一课：初次接触</h2>
+      </div>
+
+      <div class="mb-6 rounded-xl overflow-hidden border border-[#4a3728]">
+        <img id="main-image" src="https://picsum.photos/id/1011/800/1000" class="w-full aspect-[4/5] object-cover" alt="Sophia">
+      </div>
+
+      <div class="dialogue-box rounded-xl p-5 mb-6 min-h-[120px]">
+        <p id="dialogue" class="leading-relaxed text-lg"></p>
+      </div>
+
+      <div class="space-y-3" id="choices"></div>
+    </div>
+
+    <div class="lg:col-span-2 elegant-card rounded-2xl p-6">
+      <h3 class="font-serif text-xl mb-4 flex items-center gap-2">
+        <span>已解锁 CG</span>
+        <span class="text-xs px-2 py-0.5 bg-[#4a3728] rounded" id="cg-count">3/12</span>
+      </h3>
+      <div class="grid grid-cols-2 gap-3" id="gallery"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Audio elements for lewd sounds -->
+<audio id="moan1" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto"></audio>
+<audio id="moan2" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" preload="auto"></audio>
+<audio id="moan3" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" preload="auto"></audio>
+
+<script>
+let affection = 35;
+let unlockedCG = [0, 1];
+let currentScene = 0;
+let soundEnabled = true;
+
+const scenes = [
+  {
+    title: "第一课：初次接触",
+    dialogue: "你进入了这间温暖的私密房间。苏菲亚穿着半透明的黑色丝绸睡衣，正在等待着你的到来。她的眼神带着一丝笑意，轻轻地说道：'你终于来了，我的好孩子。今天想让我教你什么呢？'",
+    image: "https://picsum.photos/id/1011/800/1000",
+    choices: [
+      { text: "贴近她，手按在她腰上", affectionChange: 10, nextScene: 1, sound: null },
+      { text: "直接拉近她，深深吻下去", affectionChange: 15, nextScene: 2, sound: 'moan1' },
+      { text: "命令她先脱掉一件衣服", affectionChange: 12, nextScene: 1, sound: 'moan2' }
+    ]
+  },
+  {
+    title: "第二课：更深的接触",
+    dialogue: "苏菲亚低声笑着，把你的手引到自己胸前。'你的手在发抖。但是还不够。想要更多吗？' 她的声音带着明显的深沉与诱惑。",
+    image: "https://picsum.photos/id/1005/800/1000",
+    choices: [
+      { text: "用双手握住她的乳房", affectionChange: 18, nextScene: 2, sound: 'moan2' },
+      { text: "命令她跪下来", affectionChange: 20, nextScene: 3, sound: 'moan3' },
+      { text: "低头吻她的脐踢", affectionChange: 14, nextScene: 2, sound: 'moan1' }
+    ]
+  },
+  {
+    title: "第三课：完全的服从",
+    dialogue: "苏菲亚已经完全脱光上身，坐在你腿上，声音变得有点发抖：'今天你想怎么玩我都可以…主人。'她的眼神已经完全沉迷了。",
+    image: "https://picsum.photos/id/1009/800/1000",
+    choices: [
+      { text: "命令她用嘴服务你", affectionChange: 25, nextScene: 3, sound: 'moan3' },
+      { text: "把她按在床上，直接进入", affectionChange: 22, nextScene: 3, sound: 'moan2' },
+      { text: "让她自己动起来", affectionChange: 20, nextScene: 3, sound: 'moan3' }
+    ]
+  },
+  {
+    title: "深度调教：完全失控",
+    dialogue: "苏菲亚已经完全变成了你的形状。她的嘴已经湿润了，声音变得趋趋妄语：'好深…再用力点…我是你的东西…'",
+    image: "https://picsum.photos/id/1012/800/1000",
+    choices: [
+      { text: "继续深度操纵，让她达到高潮", affectionChange: 30, nextScene: 3, sound: 'moan3' },
+      { text: "命令她大声叫出来", affectionChange: 28, nextScene: 3, sound: 'moan2' },
+      { text: "把她反过来，更渲洒地玩", affectionChange: 25, nextScene: 3, sound: 'moan3' }
+    ]
+  }
+];
+
+function playMoan(soundId) {
+  if (!soundEnabled || !soundId) return;
+  const audio = document.getElementById(soundId);
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  }
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('sound-status').innerText = soundEnabled ? '开' : '关';
+}
+
+function updateUI() {
+  document.getElementById('affection').innerText = affection;
+  const scene = scenes[currentScene];
+  document.getElementById('scene-title').innerText = scene.title;
+  document.getElementById('dialogue').innerText = scene.dialogue;
+  document.getElementById('main-image').src = scene.image;
+
+  const choicesContainer = document.getElementById('choices');
+  choicesContainer.innerHTML = '';
+
+  scene.choices.forEach((choice) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn w-full text-left px-5 py-3.5 bg-[#2a211c] hover:bg-[#3a2a22] border border-[#4a3728] rounded-xl text-sm';
+    btn.innerHTML = choice.text;
+    btn.onclick = () => makeChoice(choice);
+    choicesContainer.appendChild(btn);
+  });
+
+  renderGallery();
+}
+
+function makeChoice(choice) {
+  affection = Math.min(100, affection + choice.affectionChange);
+
+  if (choice.sound) {
+    playMoan(choice.sound);
+  }
+
+  if (affection > 45 && !unlockedCG.includes(2)) unlockedCG.push(2);
+  if (affection > 60 && !unlockedCG.includes(3)) unlockedCG.push(3);
+  if (affection > 75 && !unlockedCG.includes(4)) unlockedCG.push(4);
+  if (affection > 85 && !unlockedCG.includes(5)) unlockedCG.push(5);
+
+  if (choice.nextScene !== undefined && scenes[choice.nextScene]) {
+    currentScene = choice.nextScene;
+  }
+  updateUI();
+}
+
+function renderGallery() {
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = '';
+
+  const cgList = [
+    { id: 0, desc: '苏菲亚的私密睡衣' },
+    { id: 1, desc: '巨乳与开口缺陷' },
+    { id: 2, desc: '跪下来的服从' },
+    { id: 3, desc: '完全裸露的身体' },
+    { id: 4, desc: '被深度操纵的表情' },
+    { id: 5, desc: '失控的高潮状态' }
+  ];
+
+  document.getElementById('cg-count').innerText = `${unlockedCG.length}/12`;
+
+  cgList.forEach((cg, index) => {
+    const div = document.createElement('div');
+    if (unlockedCG.includes(index)) {
+      div.className = 'relative group cursor-pointer';
+      div.innerHTML = `
+        <img src="https://picsum.photos/id/${1011 + index}/300/300" class="cg-img w-full aspect-square object-cover rounded-lg border border-[#4a3728]" />
+        <div class="absolute bottom-0 left-0 right-0 bg-black/70 text-[10px] px-2 py-1 rounded-b-lg">${cg.desc}</div>
+      `;
+    } else {
+      div.className = 'relative';
+      div.innerHTML = `
+        <div class="w-full aspect-square bg-[#2a211c] rounded-lg border border-[#4a3728] flex items-center justify-center">
+          <span class="text-[#5c4633] text-xs">未解锁</span>
+        </div>
+      `;
+    }
+    gallery.appendChild(div);
+  });
+}
+
+updateUI();
+</script>
+</body>
+</html>
