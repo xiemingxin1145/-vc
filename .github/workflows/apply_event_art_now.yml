@@ -1,0 +1,90 @@
+name: Apply event art now
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/apply_event_art_now.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Patch EventChoiceDialog
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path('app/src/main/java/com/example/MainActivity.kt')
+          text = path.read_text(encoding='utf-8')
+
+          if 'import androidx.compose.ui.res.painterResource' not in text:
+              text = text.replace(
+                  'import androidx.compose.ui.platform.testTag\n',
+                  'import androidx.compose.ui.platform.testTag\nimport androidx.compose.ui.res.painterResource\n'
+              )
+
+          old = '''            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(event.description, color = Color(0xFFE5E0D8), fontSize = 14.sp, lineHeight = 20.sp)
+
+                Spacer(modifier = Modifier.height(12.dp))
+'''
+
+          new = '''            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                val eventArt = SanguoGallery.eventArts.firstOrNull { art ->
+                    event.id == art.id || event.title.contains(art.title.take(2))
+                }
+
+                if (eventArt != null) {
+                    Image(
+                        painter = painterResource(id = eventArt.resId),
+                        contentDescription = eventArt.title,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(130.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF111111))
+                    )
+                    Text(
+                        text = eventArt.caption,
+                        color = Color(0xFFD4AF37),
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp
+                    )
+                }
+
+                Text(event.description, color = Color(0xFFE5E0D8), fontSize = 14.sp, lineHeight = 20.sp)
+
+                Spacer(modifier = Modifier.height(12.dp))
+'''
+
+          if new not in text:
+              if old not in text:
+                  raise SystemExit('Target block not found. EventChoiceDialog has changed.')
+              text = text.replace(old, new, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit patch
+        run: |
+          if git diff --quiet; then
+            echo "No changes. Event art already patched."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/java/com/example/MainActivity.kt
+          git commit -m "feat: display illustrations in event dialog"
+          git push
