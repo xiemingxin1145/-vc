@@ -18,6 +18,13 @@ object SanguoContentPack {
         val riskHint: String
     )
 
+    data class AchievementSeed(
+        val id: String,
+        val title: String,
+        val description: String,
+        val conditionHint: String
+    )
+
     val premiumEvents: List<IllustratedEvent> = listOf(
         IllustratedEvent(
             event = RandomEvent(
@@ -78,11 +85,51 @@ object SanguoContentPack {
             illustrationRes = R.drawable.illust_red_cliff_wind,
             rewardHint = "成功可大幅提升名望、统率，并改变统一进度。",
             riskHint = "失败会导致兵力与名望受损。"
+        ),
+        IllustratedEvent(
+            event = RandomEvent(
+                id = "evt_market_silk_road",
+                title = "丝路奇货",
+                description = "西域商队抵达长安，带来汗血马、琉璃盏和异域香料。有人说这是发财机会，也有人说其中藏着远方情报。",
+                option1 = "重金买下汗血马，押注未来战场（财富路线）",
+                option2 = "设宴盘问商队，查出背后情报网（智谋检定）",
+                option3 = "转手倒卖香料，赚一笔快钱（经商路线）",
+                statRequired = "智谋",
+                threshold = 55
+            ),
+            illustrationRes = R.drawable.illust_market_silk_road,
+            rewardHint = "成功可获得金钱、宝物或情报。",
+            riskHint = "失败会被商人反坑，损失金钱。"
+        ),
+        IllustratedEvent(
+            event = RandomEvent(
+                id = "evt_palace_shadow",
+                title = "宫墙黑影",
+                description = "深夜宫门落锁，有密使送来一封匿名奏报：朝中有人准备构陷你。你只有一夜时间稳住局势。",
+                option1 = "连夜入宫陈情，自证清白（政治检定）",
+                option2 = "反查幕后主使，先发制人（智谋检定）",
+                option3 = "暂离官场，留待东山再起（稳妥路线）",
+                statRequired = "政治",
+                threshold = 72
+            ),
+            illustrationRes = R.drawable.illust_palace_shadow,
+            rewardHint = "成功可升官、除敌、提高政治威望。",
+            riskHint = "失败可能丢官或大幅损名。"
         )
+    )
+
+    val achievementSeeds: List<AchievementSeed> = listOf(
+        AchievementSeed("ach_first_fame", "初露锋芒", "第一次让名望突破 100。", "reputation >= 100"),
+        AchievementSeed("ach_rich_family", "富甲一郡", "金钱突破 3000 两。", "gold >= 3000"),
+        AchievementSeed("ach_war_master", "百战名将", "统率突破 120，并拥有 5000 以上兵力。", "command >= 120 && conscripts >= 5000"),
+        AchievementSeed("ach_mastermind", "帷幄谋主", "智谋突破 130。", "intelligence >= 130"),
+        AchievementSeed("ach_true_lord", "一方明主", "拥有至少 3 座城池。", "ownedCities >= 3"),
+        AchievementSeed("ach_long_life", "寿考传家", "活到 75 岁以上。", "age >= 75")
     )
 
     val endingTitles: List<String> = listOf(
         "乱世枭雄", "汉室忠臣", "江东名宿", "蜀汉柱石", "魏廷权臣",
-        "白手称王", "富甲天下", "一代军神", "青史谋主", "归隐山林"
+        "白手称王", "富甲天下", "一代军神", "青史谋主", "归隐山林",
+        "西凉铁骑主", "荆襄清谈客", "青徐商路王", "宫廷不倒翁", "赤壁风云手"
     )
 }
