@@ -563,8 +563,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun triggerRandomEvent() {
-        val num = Random.nextInt(8)
-        val ev = when (num) {
+        val ev = if (SanguoAnnualEventPicker.shouldUseBattleStory(
+                currentYear = currentYear.value,
+                reputation = reputation.value,
+                currentFaction = currentFaction.value,
+                currentJob = currentJob.value
+            )) {
+            SanguoAnnualEventPicker.pickBattleStory(
+                currentYear = currentYear.value,
+                reputation = reputation.value,
+                currentFaction = currentFaction.value
+            )
+        } else when (Random.nextInt(8)) {
             0 -> RandomEvent(
                 "evt_bandit",
                 "剪径山贼",
@@ -655,6 +665,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private fun handleEventOutcome(ev: RandomEvent, option: Int) {
         val logPrefix = "公元${currentYear.value}年（${age.value}岁）- [${ev.title}]: "
         var logSuffix = ""
+
+        if (ev.id.startsWith("battle_")) {
+            val battleLog = applySanguoBattleOutcome(ev, option)
+            addLog(logPrefix + battleLog)
+            _gameState.value = GameState.Playing
+            saveCurrentGameToDb()
+            return
+        }
 
         when (ev.id) {
             "evt_bandit" -> {
