@@ -2,6 +2,7 @@ package com.sophia.game
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -17,19 +18,24 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         webView = findViewById(R.id.webview)
+        configureWebView()
+        webView.loadUrl("file:///android_asset/index.html")
+    }
 
+    private fun configureWebView() {
         val webSettings: WebSettings = webView.settings
         webSettings.javaScriptEnabled = true
         webSettings.domStorageEnabled = true
+        webSettings.databaseEnabled = true
         webSettings.allowFileAccess = true
         webSettings.allowContentAccess = true
+        webSettings.loadWithOverviewMode = true
+        webSettings.useWideViewPort = true
+        webSettings.cacheMode = WebSettings.LOAD_DEFAULT
         webSettings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
 
+        webView.webChromeClient = WebChromeClient()
         webView.webViewClient = WebViewClient()
-
-        // 加载我们的色色游戏
-        // 目前先加载 GitHub Raw，后续可以改成本地 assets
-        webView.loadUrl("https://raw.githubusercontent.com/xiemingxin1145/-vc/main/games/sophia-private-course/index.html")
     }
 
     override fun onBackPressed() {
