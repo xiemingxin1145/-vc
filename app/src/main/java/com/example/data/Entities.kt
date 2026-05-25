@@ -1,7 +1,6 @@
 package com.example.data
 
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "character_records")
@@ -9,8 +8,6 @@ data class CharacterRecord(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
     val surname: String,
-    @Ignore val courtesy: String? = null,
-    @Ignore val alias: String? = null,
     val gender: String,
     val birthYear: Int,
     val deathYear: Int,
@@ -38,8 +35,6 @@ data class ActiveGameSession(
     @PrimaryKey val id: Int = 1, // Fix to 1 for single save slot
     val name: String,
     val surname: String,
-    @Ignore val courtesy: String? = null,
-    @Ignore val alias: String? = null,
     val gender: String,
     val age: Int,
     val currentYear: Int,
