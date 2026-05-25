@@ -660,8 +660,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 "政治",
                 60
             )
-        }
-
             } // end when
         } // end else
         _gameState.value = GameState.EventChoice(ev) { opIndex ->
