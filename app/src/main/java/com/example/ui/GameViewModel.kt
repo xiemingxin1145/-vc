@@ -100,6 +100,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     // In-game dynamic values
     val surname = MutableStateFlow("")
+    val courtesy = MutableStateFlow("")   // 字
+    val alias    = MutableStateFlow("")   // 号
     val name = MutableStateFlow("")
     val gender = MutableStateFlow("男")
     val hometown = MutableStateFlow("幽州")
@@ -217,6 +219,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     fun randomizeIdentity() {
         surname.value = getRandomSurname()
         this.name.value = getRandomGivenName(gender.value)
+        courtesy.value = getRandomCourtesy(gender.value)
+        alias.value    = ""
+    }
+    private fun getRandomCourtesy(g: String): String {
+        val male   = listOf("子龙","孟德","玄德","仲谋","孔明","元直","伯符","公瑾","翼德","子义",
+                            "文远","子廉","文则","公达","奉孝","德祖","文若","仲颖","兴霸","伯言")
+        val female = listOf("月英","仁寿","思远","清漪","慕云","婵月","玉怀","芝兰","素雪","冬梅")
+        return if (g == "女") female.random() else male.random()
     }
 
     // Trigger starting stats and play the game
@@ -246,31 +256,35 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         var chBonus = 0
 
         when (origin.value) {
-            "寒门庶民" -> {
-                mBonus = 15
-                iBonus = -5
-                startGold = 100
-            }
-            "商贾大富" -> {
-                chBonus = 10
-                mBonus = -5
-                startGold = 1000
-            }
-            "世家子弟" -> {
-                iBonus = 15
-                cBonus = 5
-                pBonus = 10
-                startGold = 400
-            }
+            "寒门庶民" -> { mBonus = 15; iBonus = -5; startGold = 100 }
+            "破落士族" -> { iBonus = 10; pBonus = 5; startGold = 200 }
+            "豪强子弟" -> { cBonus = 10; mBonus = 5; startGold = 350 }
+            "商贾大富" -> { chBonus = 10; mBonus = -5; startGold = 1000 }
+            "边军孤儿" -> { mBonus = 20; cBonus = 5; startGold = 80 }
+            "黄巾遗民" -> { mBonus = 10; chBonus = 5; startGold = 50 }
+            "没落宗亲" -> { pBonus = 15; chBonus = 5; startGold = 150 }
+            "游侠少年" -> { mBonus = 10; chBonus = 8; startGold = 120 }
+            "县吏之家" -> { pBonus = 10; iBonus = 5; startGold = 250 }
+            "书院弟子" -> { iBonus = 20; pBonus = 5; startGold = 180 }
+            "工匠之家" -> { iBonus = 8; startGold = 220 }
+            "世家子弟" -> { iBonus = 15; cBonus = 5; pBonus = 10; startGold = 400 }
         }
 
         // Apply hometown bonuses
         when (hometown.value) {
             "幽州" -> mBonus += 5
             "冀州" -> pBonus += 5
+            "并州" -> { mBonus += 3; cBonus += 3 }
+            "青州" -> iBonus += 5
             "徐州" -> startGold += 200
-            "荆州" -> iBonus += 5
+            "兖州" -> { pBonus += 3; iBonus += 3 }
+            "豫州" -> chBonus += 5
+            "司隶" -> { pBonus += 8; startGold += 100 }
             "凉州" -> cBonus += 5
+            "荆州" -> iBonus += 5
+            "扬州" -> { startGold += 150; chBonus += 3 }
+            "益州" -> { iBonus += 3; startGold += 100 }
+            "交州" -> chBonus += 8
         }
 
         gold.value = startGold
@@ -322,6 +336,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             val session = repository.getActiveSession()
             if (session != null) {
                 surname.value = session.surname
+                courtesy.value = session.courtesy ?: ""
+                alias.value    = session.alias    ?: ""
                 this@GameViewModel.name.value = session.name
                 gender.value = session.gender
                 age.value = session.age
@@ -462,6 +478,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val session = ActiveGameSession(
             name = name.value,
             surname = surname.value,
+            courtesy = courtesy.value,
+            alias = alias.value,
             gender = gender.value,
             age = age.value,
             currentYear = currentYear.value,
