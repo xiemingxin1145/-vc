@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# Rerun marker: visual-map-ui-v1
 path = Path('app/src/main/java/com/example/MainActivity.kt')
 text = path.read_text(encoding='utf-8')
 
