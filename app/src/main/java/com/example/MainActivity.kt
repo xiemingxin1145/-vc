@@ -27,6 +27,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -1578,6 +1580,16 @@ fun MapTerritoryTab(viewModel: GameViewModel) {
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 val mapW = constraints.maxWidth.toFloat()
                 val mapH = constraints.maxHeight.toFloat()
+
+                Image(
+                    painter = painterResource(id = GameImageAssets.Maps.SANGUO_OVERVIEW),
+                    contentDescription = "三国天下地图",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Crop,
+                    alpha = 0.82f
+                )
 
                 // Draw map paths and rivers
                 Canvas(modifier = Modifier.fillMaxSize()) {
