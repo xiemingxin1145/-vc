@@ -527,16 +527,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         childrenList.value = upgradedChildren
 
         // Add year-end salary to gold
-        var salary = 50
-        when (currentJob.value) {
-            "小校/长随", "辅兵役勇" -> salary = 120
-            "功曹/县丞", "牙将校尉" -> salary = 200
-            "别驾/都尉", "都尉牙将" -> salary = 350
-            "偏将军" -> salary = 600
-            "太守", "中郎将/郡太守" -> salary = 1000
-            "大司马/大将军", "天下大将军" -> salary = 1800
-            "丞相", "汉中丞相" -> salary = 2400
-        }
+        val salary = JOB_SALARY[currentJob.value] ?: 50
         gold.value += salary
 
         // Health decaying a little at high ages
