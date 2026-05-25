@@ -27,9 +27,17 @@ object GameImageAssets {
     }
 
     fun imageForEvent(eventId: String): Int? = when (eventId) {
+        // 战场事件
         "battle_yellow_turban_vanguard" -> Battles.YELLOW_TURBAN_NIGHT
         "battle_hulao_duel" -> Battles.HULAO_DUEL
         "battle_chibi_fire_wind" -> Battles.RED_CLIFF_FIRE
+        // 图文premium事件（SanguoContentPack）
+        "evt_yellow_turban_oath" -> R.drawable.illust_yellow_turban_oath
+        "evt_luoyang_night" -> R.drawable.illust_luoyang_night
+        "evt_longzhong_strategy" -> R.drawable.illust_longzhong_strategy
+        "evt_red_cliff_wind" -> R.drawable.illust_red_cliff_wind
+        "evt_market_silk_road" -> R.drawable.illust_market_silk_road
+        "evt_palace_shadow" -> R.drawable.illust_palace_shadow
         else -> null
     }
 
