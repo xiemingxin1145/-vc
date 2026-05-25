@@ -106,7 +106,7 @@ fun TitleScreen(viewModel: GameViewModel) {
             contentDescription = "三国开场地图背景",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
-            alpha = 0.28f
+            alpha = 0.55f
         )
 
         Column(
@@ -134,8 +134,25 @@ fun TitleScreen(viewModel: GameViewModel) {
 
             Spacer(modifier = Modifier.height(14.dp))
 
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .border(1.5.dp, Color(0xFFD4AF37), RoundedCornerShape(16.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF0F0F11))
+            ) {
+                Image(
+                    painter = painterResource(id = GameImageAssets.Battles.RED_CLIFF_FIRE),
+                    contentDescription = "赤壁火攻开场海报",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 listOf(
@@ -150,9 +167,10 @@ fun TitleScreen(viewModel: GameViewModel) {
                         painter = painterResource(id = portraitRes),
                         contentDescription = "三国人物头像",
                         modifier = Modifier
-                            .size(42.dp)
-                            .clip(RoundedCornerShape(21.dp))
-                            .border(1.dp, Color(0xFFD4AF37).copy(alpha = 0.65f), RoundedCornerShape(21.dp)),
+                            .size(64.dp)
+                            .clip(RoundedCornerShape(32.dp))
+                            .background(Color(0xFF101010), RoundedCornerShape(32.dp))
+                            .border(2.dp, Color(0xFFD4AF37), RoundedCornerShape(32.dp)),
                         contentScale = ContentScale.Crop
                     )
                 }
