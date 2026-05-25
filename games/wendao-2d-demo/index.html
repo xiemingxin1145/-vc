@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>2D回合制测试</title>
+<style>
+html,body{margin:0;background:#111;color:#fff;font-family:Arial,"Microsoft YaHei";overflow:hidden;touch-action:none}canvas{display:block;margin:0 auto;background:#244b28;touch-action:none}.hud{position:fixed;left:8px;top:8px;background:#0008;padding:8px;border-radius:8px;font-size:13px}.bar{position:fixed;left:0;right:0;bottom:0;padding:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;background:#0007}button{border:0;border-radius:10px;background:#2f7d32;color:white;padding:10px 14px;font-weight:bold}.box{position:fixed;left:10px;right:10px;bottom:70px;background:#000b;border:1px solid #fff5;border-radius:12px;padding:10px;display:none}
+</style>
+</head>
+<body>
+<canvas id="c" width="390" height="720"></canvas>
+<div class="hud">问道类2D测试<br>点地图移动，点红色野怪开战</div>
+<div id="box" class="box"></div>
+<div class="bar"><button id="up">↑</button><button id="left">←</button><button id="down">↓</button><button id="right">→</button><button id="atk">攻击</button><button id="skill">技能</button><button id="back">回地图</button></div>
+<script>
+const c=document.getElementById('c'),g=c.getContext('2d'),box=document.getElementById('box');
+let mode='map',tick=0,keys={},texts=[];
+let p={x:190,y:430,tx:190,ty:430,hp:120,mp:60,money:0};
+let m={x:275,y:300,hp:90};
+function size(){let s=Math.min(innerWidth/390,innerHeight/720);c.style.width=390*s+'px';c.style.height=720*s+'px'}addEventListener('resize',size);size();
+function txt(t,x,y,col){texts.push({t,x,y,col,life:60})}
+function bar(x,y,w,v,col){g.fillStyle='#222';g.fillRect(x,y,w,9);g.fillStyle=col;g.fillRect(x,y,w*Math.max(0,v),9);g.strokeStyle='#fff8';g.strokeRect(x,y,w,9)}
+function hero(x,y){let step=Math.sin(tick/6)*4;g.fillStyle='#111';g.fillRect(x-11,y-31,22,18);g.fillStyle='#f0bd8a';g.beginPath();g.arc(x,y-20,13,0,7);g.fill();g.fillStyle='#2872d8';g.fillRect(x-13,y-7,26,34);g.fillStyle='#1b3f80';g.fillRect(x-13,y+22,10,18+step);g.fillRect(x+3,y+22,10,18-step);g.fillStyle='white';g.font='12px sans-serif';g.fillText('主角',x-16,y-42)}
+function enemy(x,y){g.fillStyle='#9b4038';g.beginPath();g.arc(x,y,25,0,7);g.fill();g.fillStyle='white';g.fillRect(x-10,y-7,6,6);g.fillRect(x+5,y-7,6,6);g.fillStyle='#300';g.fillRect(x-7,y+8,16,4);g.fillStyle='white';g.font='12px sans-serif';g.fillText('山精',x-14,y-34);bar(x-34,y+35,68,m.hp/90,'#d94242')}
+function map(){for(let y=0;y<720;y+=32)for(let x=0;x<390;x+=32){g.fillStyle=(x+y)%64?'#2c5a30':'#245027';g.fillRect(x,y,32,32)}g.fillStyle='#8a7048';g.fillRect(0,500,390,80);g.fillStyle='#2b75a0';g.beginPath();g.ellipse(82,115,70,38,0,0,7);g.fill();g.fillStyle='#7b332e';g.fillRect(45,185,95,95);g.fillStyle='white';g.fillText('野怪区',65,205);enemy(92,235);g.fillStyle='#5e3b18';g.fillRect(282,300,28,42);g.fillStyle='#f0bd8a';g.beginPath();g.arc(296,290,14,0,7);g.fill();g.fillStyle='white';g.fillText('NPC',286,265);hero(p.x,p.y);bar(15,55,120,p.hp/120,'#d94242');bar(15,72,120,p.mp/60,'#3775ff');g.fillText('铜钱:'+p.money,145,75)}
+function battle(){g.fillStyle='#1c2738';g.fillRect(0,0,390,720);g.fillStyle='#365f35';g.beginPath();g.ellipse(195,455,210,95,0,0,7);g.fill();hero(105,420);enemy(280,330);bar(45,460,120,p.hp/120,'#d94242');g.fillStyle='white';g.font='16px sans-serif';g.fillText('回合战斗：点攻击或技能',35,125)}
+function update(){tick++;g.clearRect(0,0,390,720);if(mode==='map'){let s=2.5;if(keys.u)p.y-=s;if(keys.d)p.y+=s;if(keys.l)p.x-=s;if(keys.r)p.x+=s;if(Math.hypot(p.tx-p.x,p.ty-p.y)>4){let a=Math.atan2(p.ty-p.y,p.tx-p.x);p.x+=Math.cos(a)*s;p.y+=Math.sin(a)*s}map()}else battle();texts=texts.filter(o=>{o.y-=.8;o.life--;g.globalAlpha=Math.min(1,o.life/20);g.fillStyle=o.col;g.font='bold 20px sans-serif';g.fillText(o.t,o.x,o.y);g.globalAlpha=1;return o.life>0});requestAnimationFrame(update)}update();
+c.onpointerdown=e=>{let r=c.getBoundingClientRect(),x=(e.clientX-r.left)*390/r.width,y=(e.clientY-r.top)*720/r.height;if(mode==='map'){if(x>45&&x<140&&y>185&&y<280){mode='battle';m.hp=90;box.style.display='none'}else{p.tx=x;p.ty=y}}};
+function hold(id,k){let b=document.getElementById(id);b.onpointerdown=()=>keys[k]=1;b.onpointerup=()=>keys[k]=0;b.onpointercancel=()=>keys[k]=0}hold('up','u');hold('down','d');hold('left','l');hold('right','r');
+document.getElementById('atk').onclick=()=>{if(mode!=='battle')return;m.hp-=22;txt('-22',280,285,'#ffd35a');if(m.hp<=0){p.money+=20;box.style.display='block';box.innerHTML='胜利！获得20铜钱。'}};
+document.getElementById('skill').onclick=()=>{if(mode!=='battle')return;if(p.mp<10){box.style.display='block';box.innerHTML='法力不足';return}p.mp-=10;m.hp-=40;txt('-40',280,285,'#8ff');if(m.hp<=0){p.money+=35;box.style.display='block';box.innerHTML='技能击败山精！获得35铜钱。'}};
+document.getElementById('back').onclick=()=>{mode='map';box.style.display='none';p.x=190;p.y=430;p.tx=p.x;p.ty=p.y};
+</script>
+</body>
+</html>
