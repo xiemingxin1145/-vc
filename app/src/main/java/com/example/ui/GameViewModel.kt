@@ -336,8 +336,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             val session = repository.getActiveSession()
             if (session != null) {
                 surname.value = session.surname
-                courtesy.value = session.courtesy ?: ""
-                alias.value    = session.alias    ?: ""
                 this@GameViewModel.name.value = session.name
                 gender.value = session.gender
                 age.value = session.age
@@ -478,8 +476,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val session = ActiveGameSession(
             name = name.value,
             surname = surname.value,
-            courtesy = courtesy.value,
-            alias = alias.value,
             gender = gender.value,
             age = age.value,
             currentYear = currentYear.value,
