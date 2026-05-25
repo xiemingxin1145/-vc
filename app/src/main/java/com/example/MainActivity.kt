@@ -203,6 +203,86 @@ fun PlayingScreen(viewModel: GameViewModel) {
             Button(onClick = { viewModel.trainSkill("智谋") }, modifier = Modifier.weight(1f)) { Text("读书") }
         }
 
+        // ── 府邸经营 ──────────────────────────────────────
+        Text("府邸经营", color = Color(0xFFD4AF37), fontWeight = FontWeight.Bold, fontSize = 15.sp)
+        SanguoSectInspiredPack.facilities.forEach { fac ->
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E22)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("${fac.name} · ${fac.type}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text(fac.effect, color = Color.LightGray, fontSize = 12.sp)
+                        Text("耗费：${fac.cost} 金", color = Color(0xFFD4AF37), fontSize = 11.sp)
+                    }
+                    Button(
+                        onClick = {
+                            when (fac.id) {
+                                "war_hall" -> viewModel.trainSkill("武力")
+                                "strategy_room" -> viewModel.trainSkill("智谋")
+                                "drill_ground" -> viewModel.trainSkill("统率")
+                                "market_post" -> viewModel.trainSkill("魅力")
+                                "office_yamen" -> viewModel.trainSkill("政治")
+                                "clan_house" -> viewModel.saveCurrentGameToDb()
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B1A1A)),
+                        modifier = Modifier.height(34.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp)
+                    ) {
+                        Text(fac.actionText, fontSize = 12.sp)
+                    }
+                }
+            }
+        }
+
+        // ── 兵书功法 ──────────────────────────────────────
+        Text("兵书功法", color = Color(0xFFD4AF37), fontWeight = FontWeight.Bold, fontSize = 15.sp)
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            SanguoSectInspiredPack.manuals.forEach { manual ->
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = when (manual.rarity) {
+                            "橙" -> Color(0xFF3A2000)
+                            "紫" -> Color(0xFF2A0A3A)
+                            else -> Color(0xFF1E1E22)
+                        }
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(10.dp).width(110.dp)) {
+                        Text(manual.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text("【${manual.rarity}】${manual.school}", color = Color(0xFFD4AF37), fontSize = 11.sp)
+                        Text(manual.effect, color = Color.LightGray, fontSize = 11.sp, lineHeight = 15.sp)
+                    }
+                }
+            }
+        }
+
+        // ── 人生路线 ──────────────────────────────────────
+        Text("人生路线", color = Color(0xFFD4AF37), fontWeight = FontWeight.Bold, fontSize = 15.sp)
+        SanguoSectInspiredPack.routes.forEach { route ->
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(route.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(route.description, color = Color.LightGray, fontSize = 12.sp)
+                    Text("核心：${route.coreStats}", color = Color(0xFFD4AF37), fontSize = 11.sp)
+                }
+            }
+        }
+
+        // ── 年度日志 ──────────────────────────────────────
+        Text("年度日志", color = Color(0xFFD4AF37), fontWeight = FontWeight.Bold, fontSize = 15.sp)
         Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E22)), modifier = Modifier.weight(1f).fillMaxWidth()) {
             Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(12.dp)) {
                 logs.forEach { log ->
