@@ -928,7 +928,7 @@ fun PlayingScreen(viewModel: GameViewModel) {
                         }
                     }
                 ) {
-                    val titles = listOf("岁月年表", "修聚仕途", "贸易集市", "宗族家族", "金戈伐图")
+                    val titles = listOf("岁月年表", "修聚仕途", "贸易集市", "宗族家族", "金戈伐图", "青史成就")
                     titles.forEachIndexed { sIndex, sTitle ->
                         Tab(
                             selected = activeTab == sIndex,
@@ -959,6 +959,7 @@ fun PlayingScreen(viewModel: GameViewModel) {
                 2 -> TradingShopTab(viewModel)
                 3 -> HeirsTab(viewModel)
                 4 -> MapTerritoryTab(viewModel)
+                5 -> AchievementTab(viewModel)
             }
         }
     }
@@ -2569,3 +2570,83 @@ fun GameOverScreen(
         }
     }
 }
+
+// -------------------------------------------------------------
+// TAB 5: ACHIEVEMENT TAB
+// -------------------------------------------------------------
+@Composable
+fun AchievementTab(viewModel: GameViewModel) {
+    val achievements = remember(viewModel) {
+        SanguoAchievementEngine.unlockedAchievements(viewModel)
+    }
+    val unlockedCount = achievements.count { it.unlocked }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(14.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        // 头部统计
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E22))
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text("青史留名", fontWeight = FontWeight.Bold, color = Color(0xFFD4AF37), fontSize = 18.sp)
+                    Text("已达成成就 $unlockedCount / ${achievements.size}", color = Color.Gray, fontSize = 13.sp)
+                }
+                Text(
+                    "$unlockedCount",
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFD4AF37)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 成就列表
+        achievements.forEach { ach ->
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (ach.unlocked) Color(0xFF2A1A0A) else Color(0xFF1E1E22)
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        if (ach.unlocked) "🏆" else "🔒",
+                        fontSize = 24.sp,
+                        modifier = Modifier.width(36.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            ach.title,
+                            fontWeight = FontWeight.Bold,
+                            color = if (ach.unlocked) Color(0xFFD4AF37) else Color.Gray,
+                            fontSize = 15.sp
+                        )
+                        Text(
+                            ach.description,
+                            color = if (ach.unlocked) Color(0xFFE5E0D8) else Color(0xFF666666),
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
