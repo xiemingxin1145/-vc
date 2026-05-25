@@ -101,6 +101,14 @@ fun TitleScreen(viewModel: GameViewModel) {
             },
         contentAlignment = Alignment.Center
     ) {
+        Image(
+            painter = painterResource(id = GameImageAssets.Maps.SANGUO_OVERVIEW),
+            contentDescription = "三国开场地图背景",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.28f
+        )
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(24.dp)
@@ -124,7 +132,33 @@ fun TitleScreen(viewModel: GameViewModel) {
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                listOf(
+                    GameImageAssets.Portraits.LIU_BEI,
+                    GameImageAssets.Portraits.CAO_CAO,
+                    GameImageAssets.Portraits.SUN_QUAN,
+                    GameImageAssets.Portraits.GUAN_YU,
+                    GameImageAssets.Portraits.ZHUGE_LIANG,
+                    GameImageAssets.Portraits.ZHAO_YUN
+                ).forEach { portraitRes ->
+                    Image(
+                        painter = painterResource(id = portraitRes),
+                        contentDescription = "三国人物头像",
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(21.dp))
+                            .border(1.dp, Color(0xFFD4AF37).copy(alpha = 0.65f), RoundedCornerShape(21.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = "—— 乱世宏图演义录 · 承嗣继承版 ——",
