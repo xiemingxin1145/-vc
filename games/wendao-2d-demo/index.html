@@ -3,34 +3,467 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>2D回合制测试</title>
+<title>仙侠2D</title>
 <style>
-html,body{margin:0;background:#111;color:#fff;font-family:Arial,"Microsoft YaHei";overflow:hidden;touch-action:none}canvas{display:block;margin:0 auto;background:#244b28;touch-action:none}.hud{position:fixed;left:8px;top:8px;background:#0008;padding:8px;border-radius:8px;font-size:13px}.bar{position:fixed;left:0;right:0;bottom:0;padding:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;background:#0007}button{border:0;border-radius:10px;background:#2f7d32;color:white;padding:10px 14px;font-weight:bold}.box{position:fixed;left:10px;right:10px;bottom:70px;background:#000b;border:1px solid #fff5;border-radius:12px;padding:10px;display:none}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#0a0a12;overflow:hidden;touch-action:none;user-select:none}
+canvas{display:block;margin:0 auto;image-rendering:pixelated}
+#ui{position:fixed;top:0;left:0;right:0;pointer-events:none}
+#hud{padding:8px 12px;display:flex;gap:12px;align-items:center}
+.statbox{background:#0009;border:1px solid #fff2;border-radius:8px;padding:6px 10px;font-family:"Microsoft YaHei",Arial;font-size:12px;color:#fff}
+.name{color:#f5d87a;font-weight:bold;font-size:13px}
+.bar-wrap{display:flex;align-items:center;gap:4px;margin-top:3px}
+.bar-bg{width:90px;height:7px;background:#222;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .2s}
+#hp-bar{background:linear-gradient(90deg,#c0392b,#e74c3c)}
+#mp-bar{background:linear-gradient(90deg,#2471a3,#3498db)}
+#money{color:#f5d87a;font-size:12px}
+#btns{position:fixed;bottom:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;pointer-events:all}
+#dpad{display:grid;grid-template-columns:50px 50px 50px;grid-template-rows:50px 50px;gap:4px}
+#dpad button{background:#ffffff18;border:1px solid #fff3;border-radius:10px;color:white;font-size:18px;display:flex;align-items:center;justify-content:center;touch-action:none}
+#actions{display:flex;gap:8px}
+#actions button{background:linear-gradient(135deg,#6d3b9e,#9b59b6);border:none;border-radius:12px;color:white;padding:10px 18px;font-size:13px;font-family:"Microsoft YaHei",Arial;font-weight:bold;letter-spacing:1px;box-shadow:0 2px 8px #0005}
+#actions button:active{transform:scale(.95)}
+#msgbox{position:fixed;left:10px;right:10px;bottom:160px;background:#000c;border:1px solid #f5d87a44;border-radius:12px;padding:10px 14px;font-family:"Microsoft YaHei",Arial;font-size:13px;color:#f5d87a;display:none;pointer-events:none;text-align:center}
 </style>
 </head>
 <body>
-<canvas id="c" width="390" height="720"></canvas>
-<div class="hud">问道类2D测试<br>点地图移动，点红色野怪开战</div>
-<div id="box" class="box"></div>
-<div class="bar"><button id="up">↑</button><button id="left">←</button><button id="down">↓</button><button id="right">→</button><button id="atk">攻击</button><button id="skill">技能</button><button id="back">回地图</button></div>
+<canvas id="c"></canvas>
+<div id="ui">
+  <div id="hud">
+    <div class="statbox">
+      <div class="name">⚔️ 主角</div>
+      <div class="bar-wrap"><span style="color:#e74c3c;font-size:10px">气</span><div class="bar-bg"><div class="bar-fill" id="hp-bar" style="width:100%"></div></div><span id="hp-txt" style="font-size:10px;color:#aaa">120/120</span></div>
+      <div class="bar-wrap"><span style="color:#3498db;font-size:10px">灵</span><div class="bar-bg"><div class="bar-fill" id="mp-bar" style="width:100%"></div></div><span id="mp-txt" style="font-size:10px;color:#aaa">60/60</span></div>
+    </div>
+    <div class="statbox"><div id="money">💰 铜钱：0</div></div>
+  </div>
+</div>
+<div id="msgbox"></div>
+<div id="btns">
+  <div id="actions">
+    <button id="atk">⚔️ 攻击</button>
+    <button id="skill">✨ 法术</button>
+    <button id="back" style="background:linear-gradient(135deg,#2c3e50,#4a6274)">🗺 返回</button>
+  </div>
+  <div id="dpad">
+    <div></div><button id="up">↑</button><div></div>
+    <button id="left">←</button><button id="down">↓</button><button id="right">→</button>
+  </div>
+</div>
 <script>
-const c=document.getElementById('c'),g=c.getContext('2d'),box=document.getElementById('box');
-let mode='map',tick=0,keys={},texts=[];
-let p={x:190,y:430,tx:190,ty:430,hp:120,mp:60,money:0};
-let m={x:275,y:300,hp:90};
-function size(){let s=Math.min(innerWidth/390,innerHeight/720);c.style.width=390*s+'px';c.style.height=720*s+'px'}addEventListener('resize',size);size();
-function txt(t,x,y,col){texts.push({t,x,y,col,life:60})}
-function bar(x,y,w,v,col){g.fillStyle='#222';g.fillRect(x,y,w,9);g.fillStyle=col;g.fillRect(x,y,w*Math.max(0,v),9);g.strokeStyle='#fff8';g.strokeRect(x,y,w,9)}
-function hero(x,y){let step=Math.sin(tick/6)*4;g.fillStyle='#111';g.fillRect(x-11,y-31,22,18);g.fillStyle='#f0bd8a';g.beginPath();g.arc(x,y-20,13,0,7);g.fill();g.fillStyle='#2872d8';g.fillRect(x-13,y-7,26,34);g.fillStyle='#1b3f80';g.fillRect(x-13,y+22,10,18+step);g.fillRect(x+3,y+22,10,18-step);g.fillStyle='white';g.font='12px sans-serif';g.fillText('主角',x-16,y-42)}
-function enemy(x,y){g.fillStyle='#9b4038';g.beginPath();g.arc(x,y,25,0,7);g.fill();g.fillStyle='white';g.fillRect(x-10,y-7,6,6);g.fillRect(x+5,y-7,6,6);g.fillStyle='#300';g.fillRect(x-7,y+8,16,4);g.fillStyle='white';g.font='12px sans-serif';g.fillText('山精',x-14,y-34);bar(x-34,y+35,68,m.hp/90,'#d94242')}
-function map(){for(let y=0;y<720;y+=32)for(let x=0;x<390;x+=32){g.fillStyle=(x+y)%64?'#2c5a30':'#245027';g.fillRect(x,y,32,32)}g.fillStyle='#8a7048';g.fillRect(0,500,390,80);g.fillStyle='#2b75a0';g.beginPath();g.ellipse(82,115,70,38,0,0,7);g.fill();g.fillStyle='#7b332e';g.fillRect(45,185,95,95);g.fillStyle='white';g.fillText('野怪区',65,205);enemy(92,235);g.fillStyle='#5e3b18';g.fillRect(282,300,28,42);g.fillStyle='#f0bd8a';g.beginPath();g.arc(296,290,14,0,7);g.fill();g.fillStyle='white';g.fillText('NPC',286,265);hero(p.x,p.y);bar(15,55,120,p.hp/120,'#d94242');bar(15,72,120,p.mp/60,'#3775ff');g.fillText('铜钱:'+p.money,145,75)}
-function battle(){g.fillStyle='#1c2738';g.fillRect(0,0,390,720);g.fillStyle='#365f35';g.beginPath();g.ellipse(195,455,210,95,0,0,7);g.fill();hero(105,420);enemy(280,330);bar(45,460,120,p.hp/120,'#d94242');g.fillStyle='white';g.font='16px sans-serif';g.fillText('回合战斗：点攻击或技能',35,125)}
-function update(){tick++;g.clearRect(0,0,390,720);if(mode==='map'){let s=2.5;if(keys.u)p.y-=s;if(keys.d)p.y+=s;if(keys.l)p.x-=s;if(keys.r)p.x+=s;if(Math.hypot(p.tx-p.x,p.ty-p.y)>4){let a=Math.atan2(p.ty-p.y,p.tx-p.x);p.x+=Math.cos(a)*s;p.y+=Math.sin(a)*s}map()}else battle();texts=texts.filter(o=>{o.y-=.8;o.life--;g.globalAlpha=Math.min(1,o.life/20);g.fillStyle=o.col;g.font='bold 20px sans-serif';g.fillText(o.t,o.x,o.y);g.globalAlpha=1;return o.life>0});requestAnimationFrame(update)}update();
-c.onpointerdown=e=>{let r=c.getBoundingClientRect(),x=(e.clientX-r.left)*390/r.width,y=(e.clientY-r.top)*720/r.height;if(mode==='map'){if(x>45&&x<140&&y>185&&y<280){mode='battle';m.hp=90;box.style.display='none'}else{p.tx=x;p.ty=y}}};
-function hold(id,k){let b=document.getElementById(id);b.onpointerdown=()=>keys[k]=1;b.onpointerup=()=>keys[k]=0;b.onpointercancel=()=>keys[k]=0}hold('up','u');hold('down','d');hold('left','l');hold('right','r');
-document.getElementById('atk').onclick=()=>{if(mode!=='battle')return;m.hp-=22;txt('-22',280,285,'#ffd35a');if(m.hp<=0){p.money+=20;box.style.display='block';box.innerHTML='胜利！获得20铜钱。'}};
-document.getElementById('skill').onclick=()=>{if(mode!=='battle')return;if(p.mp<10){box.style.display='block';box.innerHTML='法力不足';return}p.mp-=10;m.hp-=40;txt('-40',280,285,'#8ff');if(m.hp<=0){p.money+=35;box.style.display='block';box.innerHTML='技能击败山精！获得35铜钱。'}};
-document.getElementById('back').onclick=()=>{mode='map';box.style.display='none';p.x=190;p.y=430;p.tx=p.x;p.ty=p.y};
+const cv=document.getElementById('c'),g=cv.getContext('2d');
+let W=390,H=720;
+function resize(){let s=Math.min(innerWidth/W,innerHeight/H);cv.style.width=W*s+'px';cv.style.height=H*s+'px';cv.width=W;cv.height=H}
+addEventListener('resize',resize);resize();
+
+// State
+let tick=0,mode='map';
+let p={x:195,y:450,tx:195,ty:450,hp:120,mhp:120,mp:60,mmp:60,money:0,dir:0,moving:false,step:0,trail:[]};
+let enemy={x:100,y:230,hp:90,mhp:90,alive:true,anim:0};
+let keys={u:0,d:0,l:0,r:0};
+let particles=[];
+let floats=[];
+
+// Particle system
+function spawnParticles(x,y,col,n=8){
+  for(let i=0;i<n;i++){
+    let a=Math.random()*Math.PI*2,spd=1+Math.random()*3;
+    particles.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,col,life:40,mlife:40,size:2+Math.random()*3});
+  }
+}
+function spawnFloat(text,x,y,col){floats.push({text,x,y,col,life:60,vy:-1.2})}
+
+// Draw hero with walk animation
+function drawHero(x,y,dir,moving,step,alpha=1){
+  g.save();g.globalAlpha=alpha;
+  let t=step;
+  let legL=moving?Math.sin(t*0.25)*10:0;
+  let legR=moving?-Math.sin(t*0.25)*10:0;
+  let bodyBob=moving?Math.abs(Math.sin(t*0.25))*3:0;
+  let flip=dir<0;
+  if(flip){g.save();g.translate(x,y);g.scale(-1,1);g.translate(-x,-y);}
+
+  // Shadow
+  g.fillStyle='#00000044';g.beginPath();g.ellipse(x,y+8,14,5,0,0,Math.PI*2);g.fill();
+
+  // Robe bottom / legs
+  g.fillStyle='#5b2d8e';
+  g.fillRect(x-11,y-bodyBob,8,22+legL);
+  g.fillRect(x+3,y-bodyBob,8,22+legR);
+  // Robe bottom trim
+  g.fillStyle='#f5d87a';
+  g.fillRect(x-11,y+20+legL-bodyBob,8,3);
+  g.fillRect(x+3,y+20+legR-bodyBob,8,3);
+
+  // Body robe
+  g.fillStyle='#7d3fb5';
+  g.fillRect(x-13,y-24-bodyBob,26,28);
+  // Robe detail
+  g.fillStyle='#f5d87a';
+  g.fillRect(x-1,y-24-bodyBob,2,28);
+  g.fillRect(x-13,y-10-bodyBob,26,2);
+
+  // Belt
+  g.fillStyle='#c0932a';
+  g.fillRect(x-13,y-bodyBob,26,5);
+
+  // Neck
+  g.fillStyle='#f0bd8a';g.fillRect(x-4,y-32-bodyBob,8,10);
+
+  // Head
+  g.fillStyle='#f0bd8a';g.beginPath();g.ellipse(x,y-38-bodyBob,11,12,0,0,Math.PI*2);g.fill();
+
+  // Hair / topknot
+  g.fillStyle='#1a0a00';
+  g.fillRect(x-10,y-50-bodyBob,20,14);
+  g.beginPath();g.ellipse(x,y-52-bodyBob,5,7,0,0,Math.PI*2);g.fill();
+  // Hair pin
+  g.strokeStyle='#f5d87a';g.lineWidth=1.5;
+  g.beginPath();g.moveTo(x-3,y-55-bodyBob);g.lineTo(x+3,y-49-bodyBob);g.stroke();
+
+  // Eyes
+  g.fillStyle='#1a0a00';
+  g.fillRect(x-6,y-40-bodyBob,3,3);
+  g.fillRect(x+3,y-40-bodyBob,3,3);
+
+  // Sword on back
+  g.strokeStyle='#c0932a';g.lineWidth=2;
+  g.beginPath();g.moveTo(x+14,y-45-bodyBob);g.lineTo(x+14,y-5-bodyBob);g.stroke();
+  g.fillStyle='#888';g.fillRect(x+10,y-24-bodyBob,8,3);
+
+  // Name tag
+  g.globalAlpha=alpha;
+  g.fillStyle='white';g.font='11px "Microsoft YaHei",Arial';
+  g.textAlign='center';g.fillText('主角',x,y-62-bodyBob);
+
+  if(flip)g.restore();
+  g.restore();g.textAlign='left';
+}
+
+// Draw enemy (山精)
+function drawEnemy(x,y,hp,mhp,anim){
+  if(hp<=0)return;
+  let bob=Math.sin(anim*0.05)*3;
+  // Shadow
+  g.fillStyle='#00000044';g.beginPath();g.ellipse(x,y+28,20,7,0,0,Math.PI*2);g.fill();
+  // Body
+  g.fillStyle='#6b2a24';g.beginPath();g.ellipse(x,y+bob,22,28,0,0,Math.PI*2);g.fill();
+  // Arms
+  g.fillStyle='#5a2020';
+  g.fillRect(x-34,y-10+bob,14,10);
+  g.fillRect(x+20,y-10+bob,14,10);
+  // Claws
+  g.fillStyle='#333';
+  for(let i=0;i<3;i++){g.fillRect(x-35+i*2,y+bob,3,7)}
+  for(let i=0;i<3;i++){g.fillRect(x+22+i*2,y+bob,3,7)}
+  // Head
+  g.fillStyle='#7a3330';g.beginPath();g.ellipse(x,y-24+bob,18,16,0,0,Math.PI*2);g.fill();
+  // Horns
+  g.fillStyle='#4a1a1a';
+  g.beginPath();g.moveTo(x-12,y-35+bob);g.lineTo(x-6,y-52+bob);g.lineTo(x-2,y-35+bob);g.fill();
+  g.beginPath();g.moveTo(x+2,y-35+bob);g.lineTo(x+8,y-52+bob);g.lineTo(x+14,y-35+bob);g.fill();
+  // Eyes (glowing)
+  g.fillStyle='#ff4400';g.beginPath();g.ellipse(x-7,y-26+bob,5,4,0,0,Math.PI*2);g.fill();
+  g.fillStyle='#ff4400';g.beginPath();g.ellipse(x+7,y-26+bob,5,4,0,0,Math.PI*2);g.fill();
+  g.fillStyle='#ffaa00';g.beginPath();g.ellipse(x-7,y-26+bob,2,2,0,0,Math.PI*2);g.fill();
+  g.fillStyle='#ffaa00';g.beginPath();g.ellipse(x+7,y-26+bob,2,2,0,0,Math.PI*2);g.fill();
+  // Mouth
+  g.fillStyle='#200';g.fillRect(x-8,y-16+bob,16,5);
+  g.fillStyle='white';for(let i=0;i<4;i++)g.fillRect(x-7+i*4,y-16+bob,2,4);
+  // Name
+  g.fillStyle='#ff8888';g.font='11px "Microsoft YaHei",Arial';g.textAlign='center';
+  g.fillText('山精',x,y-48+bob);
+  // HP bar
+  let bw=60,bx=x-30,by=y+42;
+  g.fillStyle='#222';g.fillRect(bx,by,bw,7);
+  g.fillStyle='#c0392b';g.fillRect(bx,by,bw*(hp/mhp),7);
+  g.strokeStyle='#fff4';g.lineWidth=1;g.strokeRect(bx,by,bw,7);
+  g.textAlign='left';
+}
+
+// Map scene
+function drawMap(){
+  // Sky gradient
+  let sky=g.createLinearGradient(0,0,0,320);
+  sky.addColorStop(0,'#0d1b3e');sky.addColorStop(1,'#1a2a5e');
+  g.fillStyle=sky;g.fillRect(0,0,W,320);
+
+  // Moon
+  g.fillStyle='#fffbe6';g.beginPath();g.arc(310,60,28,0,Math.PI*2);g.fill();
+  g.fillStyle='#0d1b3e';g.beginPath();g.arc(320,55,24,0,Math.PI*2);g.fill();
+
+  // Stars
+  g.fillStyle='white';
+  [[30,30],[80,15],[150,40],[200,20],[60,80],[260,35],[340,90],[180,70],[120,55]].forEach(([sx,sy])=>{
+    g.globalAlpha=0.5+0.5*Math.sin(tick*0.03+sx);
+    g.beginPath();g.arc(sx,sy,1.2,0,Math.PI*2);g.fill();
+  });
+  g.globalAlpha=1;
+
+  // Mountains
+  g.fillStyle='#0f2044';
+  [[0,280,120,160],[100,300,140,180],[240,260,160,200],[330,290,130,170]].forEach(([mx,my,mw,mh])=>{
+    g.beginPath();g.moveTo(mx,my);g.lineTo(mx+mw/2,my-mh);g.lineTo(mx+mw,my);g.fill();
+  });
+  // Snow caps
+  g.fillStyle='#e8f4f8';
+  [[60,120,30],[170,120,35],[320,110,28]].forEach(([px,py,pw])=>{
+    g.beginPath();g.moveTo(px,py);g.lineTo(px+pw/2,py-40);g.lineTo(px+pw,py);g.fill();
+  });
+
+  // Ground gradient
+  let grd=g.createLinearGradient(0,300,0,H);
+  grd.addColorStop(0,'#1a3a1a');grd.addColorStop(1,'#0d200d');
+  g.fillStyle=grd;g.fillRect(0,300,W,H-300);
+
+  // Path
+  g.fillStyle='#8a7048';
+  g.beginPath();g.moveTo(160,H);g.lineTo(195,300);g.lineTo(230,H);g.fill();
+
+  // Lake
+  let lake=g.createRadialGradient(75,210,5,75,210,55);
+  lake.addColorStop(0,'#2e7bb5');lake.addColorStop(1,'#1a4a70');
+  g.fillStyle=lake;g.beginPath();g.ellipse(75,210,55,30,0,0,Math.PI*2);g.fill();
+  // Lake shimmer
+  g.strokeStyle='#ffffff22';g.lineWidth=1;
+  for(let i=0;i<4;i++){
+    g.beginPath();g.moveTo(40+i*12,208+Math.sin(tick*0.05+i)*3);
+    g.lineTo(55+i*12,208+Math.sin(tick*0.05+i)*3);g.stroke();
+  }
+
+  // Ancient temple
+  g.fillStyle='#6b3a2a';g.fillRect(50,340,80,80);
+  g.fillStyle='#8a4a38';g.fillRect(44,330,92,18);
+  // Roof
+  g.fillStyle='#4a2a1a';
+  g.beginPath();g.moveTo(44,330);g.lineTo(90,295);g.lineTo(136,330);g.fill();
+  // Roof tiles
+  g.strokeStyle='#333';g.lineWidth=1;
+  for(let i=0;i<6;i++){g.beginPath();g.moveTo(50+i*14,330);g.lineTo(90,295);g.stroke();}
+  // Door
+  g.fillStyle='#2a1a10';g.fillRect(78,370,24,50);
+  g.fillStyle='#c09030';g.fillRect(82,392,4,4);g.fillRect(96,392,4,4);
+  // Temple text
+  g.fillStyle='#f5d87a';g.font='bold 11px "Microsoft YaHei",Arial';
+  g.textAlign='center';g.fillText('天玄观',90,360);g.textAlign='left';
+  // Lanterns
+  g.fillStyle='#ff6600';
+  g.beginPath();g.ellipse(55,345,5,7,0,0,Math.PI*2);g.fill();
+  g.beginPath();g.ellipse(125,345,5,7,0,0,Math.PI*2);g.fill();
+  g.strokeStyle='#ff660066';g.lineWidth=8;
+  g.beginPath();g.arc(55,345,12,0,Math.PI*2);g.stroke();
+  g.beginPath();g.arc(125,345,12,0,Math.PI*2);g.stroke();
+
+  // Pine trees
+  [[280,360],[310,380],[330,350],[260,400]].forEach(([tx,ty])=>{
+    g.fillStyle='#1a3a1a';
+    g.beginPath();g.moveTo(tx,ty);g.lineTo(tx+16,ty+40);g.lineTo(tx-16,ty+40);g.fill();
+    g.beginPath();g.moveTo(tx,ty+20);g.lineTo(tx+22,ty+55);g.lineTo(tx-22,ty+55);g.fill();
+    g.fillStyle='#5e3b18';g.fillRect(tx-5,ty+55,10,15);
+  });
+
+  // Enemy area sign
+  if(enemy.alive){
+    g.fillStyle='#ff000033';g.fillRect(50,165,90,90);
+    g.strokeStyle='#ff444466';g.lineWidth=2;g.strokeRect(50,165,90,90);
+    g.fillStyle='#ff8888';g.font='10px "Microsoft YaHei",Arial';
+    g.textAlign='center';g.fillText('⚠ 妖兽区',95,180);g.textAlign='left';
+    drawEnemy(95,230,enemy.hp,enemy.mhp,enemy.anim);
+  }
+
+  // NPC
+  drawNPC(295,380);
+
+  // Trail
+  p.trail.forEach((t,i)=>{
+    let a=i/p.trail.length*0.3;
+    drawHero(t.x,t.y,t.dir,false,t.step,a);
+  });
+
+  // Hero
+  drawHero(p.x,p.y,p.dir,p.moving,p.step);
+
+  // HP/MP UI
+  document.getElementById('hp-bar').style.width=(p.hp/p.mhp*100)+'%';
+  document.getElementById('mp-bar').style.width=(p.mp/p.mmp*100)+'%';
+  document.getElementById('hp-txt').textContent=p.hp+'/'+p.mhp;
+  document.getElementById('mp-txt').textContent=p.mp+'/'+p.mmp;
+  document.getElementById('money').textContent='💰 铜钱：'+p.money;
+}
+
+function drawNPC(x,y){
+  // Simple NPC - elder
+  g.fillStyle='#3a3a3a';g.fillRect(x-5,y+5,10,25);
+  g.fillStyle='#f0bd8a';g.beginPath();g.arc(x,y,11,0,Math.PI*2);g.fill();
+  g.fillStyle='white';g.fillRect(x-9,y-8,18,10);
+  g.fillStyle='#888';g.font='10px "Microsoft YaHei",Arial';
+  g.textAlign='center';g.fillText('老道',x,y-16);g.textAlign='left';
+}
+
+// Battle scene
+function drawBattle(){
+  // Background
+  let bg=g.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#0a0015');bg.addColorStop(1,'#1a0530');
+  g.fillStyle=bg;g.fillRect(0,0,W,H);
+
+  // Battle platform
+  let plat=g.createRadialGradient(195,480,20,195,480,200);
+  plat.addColorStop(0,'#2a1a4a');plat.addColorStop(1,'#0a0015');
+  g.fillStyle=plat;g.beginPath();g.ellipse(195,480,200,80,0,0,Math.PI*2);g.fill();
+  // Platform lines
+  g.strokeStyle='#6a3ab044';g.lineWidth=1;
+  for(let r=30;r<200;r+=30){g.beginPath();g.ellipse(195,480,r,r*0.4,0,0,Math.PI*2);g.stroke();}
+
+  // Magic circle
+  g.strokeStyle='#8844ff44';g.lineWidth=2;
+  g.beginPath();g.arc(195,480,120,0,Math.PI*2);g.stroke();
+  for(let i=0;i<6;i++){
+    let a=i/6*Math.PI*2+tick*0.005;
+    g.beginPath();g.moveTo(195,480);
+    g.lineTo(195+Math.cos(a)*120,480+Math.sin(a)*50);g.stroke();
+  }
+
+  // Hero side
+  drawHero(100,430,1,false,0);
+  // Enemy side
+  drawEnemy(290,350,enemy.hp,enemy.mhp,enemy.anim);
+
+  // VS text
+  g.fillStyle='#f5d87a';g.font='bold 22px "Microsoft YaHei",Arial';
+  g.textAlign='center';g.fillText('⚔ 战斗 ⚔',195,140);g.textAlign='left';
+
+  // Hint
+  g.fillStyle='#aaa';g.font='12px "Microsoft YaHei",Arial';
+  g.textAlign='center';g.fillText('选择技能出战',195,170);g.textAlign='left';
+}
+
+// Particles & floats
+function drawParticles(){
+  particles=particles.filter(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.1;p.life--;
+    g.globalAlpha=p.life/p.mlife;
+    g.fillStyle=p.col;g.beginPath();g.arc(p.x,p.y,p.size*(p.life/p.mlife),0,Math.PI*2);g.fill();
+    return p.life>0;
+  });
+  floats=floats.filter(f=>{
+    f.y+=f.vy;f.life--;
+    g.globalAlpha=Math.min(1,f.life/15);
+    g.fillStyle=f.col;g.font='bold 18px "Microsoft YaHei",Arial';
+    g.textAlign='center';g.fillText(f.text,f.x,f.y);
+    return f.life>0;
+  });
+  g.globalAlpha=1;g.textAlign='left';
+}
+
+// Main loop
+function update(){
+  tick++;
+  enemy.anim++;
+  g.clearRect(0,0,W,H);
+
+  if(mode==='map'){
+    // Movement
+    let spd=2.5,moved=false;
+    if(keys.u){p.y-=spd;p.dir=0;moved=true}
+    if(keys.d){p.y+=spd;p.dir=0;moved=true}
+    if(keys.l){p.x-=spd;p.dir=-1;moved=true}
+    if(keys.r){p.x+=spd;p.dir=1;moved=true}
+    // Click-to-move
+    if(Math.hypot(p.tx-p.x,p.ty-p.y)>4){
+      let a=Math.atan2(p.ty-p.y,p.tx-p.x);
+      p.x+=Math.cos(a)*spd;p.y+=Math.sin(a)*spd;
+      p.dir=Math.cos(a)>0?1:-1;moved=true;
+    }
+    p.moving=moved;
+    if(moved){
+      p.step++;
+      p.trail.push({x:p.x,y:p.y,dir:p.dir,step:p.step});
+      if(p.trail.length>5)p.trail.shift();
+    } else p.trail=[];
+    p.x=Math.max(20,Math.min(W-20,p.x));
+    p.y=Math.max(160,Math.min(H-80,p.y));
+    drawMap();
+  } else {
+    drawBattle();
+  }
+
+  drawParticles();
+  requestAnimationFrame(update);
+}
+update();
+
+// Touch/click on canvas
+cv.onpointerdown=e=>{
+  let r=cv.getBoundingClientRect();
+  let x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;
+  if(mode==='map'){
+    // Check enemy click
+    if(enemy.alive&&Math.hypot(x-95,y-230)<40){
+      mode='battle';enemy.hp=enemy.mhp;showMsg('');return;
+    }
+    p.tx=x;p.ty=y;
+  }
+};
+
+// Dpad
+function hold(id,k){
+  let b=document.getElementById(id);
+  if(!b)return;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=1});
+  b.addEventListener('pointerup',()=>keys[k]=0);
+  b.addEventListener('pointercancel',()=>keys[k]=0);
+}
+hold('up','u');hold('down','d');hold('left','l');hold('right','r');
+
+// Actions
+function showMsg(t){
+  let m=document.getElementById('msgbox');
+  if(t){m.style.display='block';m.innerHTML=t;}
+  else m.style.display='none';
+}
+
+document.getElementById('atk').onclick=()=>{
+  if(mode!=='battle')return;
+  if(enemy.hp<=0)return;
+  let dmg=18+Math.floor(Math.random()*10);
+  enemy.hp=Math.max(0,enemy.hp-dmg);
+  spawnParticles(290,350,'#ff4444',10);
+  spawnFloat('-'+dmg,290,310,'#ff6666');
+  if(enemy.hp<=0){
+    let earn=20+Math.floor(Math.random()*15);
+    p.money+=earn;
+    spawnParticles(290,350,'#f5d87a',20);
+    showMsg('⚔️ 斩杀山精！获得'+earn+'枚铜钱');
+    enemy.alive=false;
+  }
+};
+
+document.getElementById('skill').onclick=()=>{
+  if(mode!=='battle')return;
+  if(enemy.hp<=0)return;
+  if(p.mp<15){showMsg('灵力不足！');return;}
+  p.mp=Math.max(0,p.mp-15);
+  let dmg=40+Math.floor(Math.random()*15);
+  enemy.hp=Math.max(0,enemy.hp-dmg);
+  spawnParticles(290,350,'#aa44ff',15);
+  spawnParticles(290,350,'#ffffff',8);
+  spawnFloat('-'+dmg,290,300,'#cc88ff');
+  document.getElementById('mp-bar').style.width=(p.mp/p.mmp*100)+'%';
+  if(enemy.hp<=0){
+    let earn=35+Math.floor(Math.random()*20);
+    p.money+=earn;
+    spawnParticles(290,350,'#f5d87a',25);
+    showMsg('✨ 法术斩妖！获得'+earn+'枚铜钱');
+    enemy.alive=false;
+  }
+};
+
+document.getElementById('back').onclick=()=>{
+  mode='map';showMsg('');
+  p.x=195;p.y=450;p.tx=195;p.ty=450;p.trail=[];
+};
 </script>
 </body>
 </html>
