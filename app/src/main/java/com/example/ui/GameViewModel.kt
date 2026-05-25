@@ -527,7 +527,26 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         childrenList.value = upgradedChildren
 
         // Add year-end salary to gold
-        val salary = JOB_SALARY[currentJob.value] ?: 50
+        val salary = when (currentJob.value) {
+            "乡勇头目", "亭长" -> 80
+            "什长", "县吏" -> 100
+            "屯长", "主簿" -> 130
+            "军侯", "县丞" -> 160
+            "校尉", "县令", "功曹" -> 200
+            "都尉", "别驾" -> 280
+            "裨将军", "郡丞" -> 360
+            "偏将军", "太守" -> 500
+            "中郎将", "州刺史" -> 650
+            "杂号将军", "州牧", "尚书郎" -> 800
+            "四征将军", "侍中", "九卿" -> 1000
+            "四镇将军", "尚书令" -> 1200
+            "卫将军", "司徒", "司空" -> 1500
+            "骠骑将军" -> 1800
+            "大将军" -> 2000
+            "丞相" -> 2400
+            "大司马" -> 2500
+            else -> 50
+        }
         gold.value += salary
 
         // Health decaying a little at high ages
@@ -1332,6 +1351,48 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             _gameState.value = GameState.Playing
             saveCurrentGameToDb()
             onComplete(victory)
+        }
+    }
+
+    // ── 爵位 ────────────────────────────
+    val nobleTitle = MutableStateFlow("白身")
+
+    val MILITARY_RANKS = listOf(
+        "江湖豪侠","乡勇头目","什长","屯长","军侯","校尉","都尉",
+        "裨将军","偏将军","中郎将","杂号将军","四征将军","四镇将军",
+        "卫将军","骠骑将军","大将军","大司马"
+    )
+    val CIVIL_RANKS = listOf(
+        "江湖豪侠","亭长","县吏","主簿","县丞","县令","功曹","别驾",
+        "郡丞","太守","州刺史","州牧","尚书郎","侍中","九卿",
+        "尚书令","司徒","司空","丞相"
+    )
+    val NOBLE_RANKS = listOf("白身","关内侯","亭侯","乡侯","县侯","郡公","王")
+
+    fun promoteMilitary() {
+        val cur = MILITARY_RANKS.indexOf(currentJob.value)
+        if (cur in 0 until MILITARY_RANKS.size - 1) {
+            currentJob.value = MILITARY_RANKS[cur + 1]
+            reputation.value += 30
+            addLog("公元${currentYear.value}年（${age.value}岁）：晋升武职——【${currentJob.value}】！")
+        }
+    }
+
+    fun promoteCivil() {
+        val cur = CIVIL_RANKS.indexOf(currentJob.value)
+        if (cur in 0 until CIVIL_RANKS.size - 1) {
+            currentJob.value = CIVIL_RANKS[cur + 1]
+            reputation.value += 25
+            addLog("公元${currentYear.value}年（${age.value}岁）：擢升文职——【${currentJob.value}】！")
+        }
+    }
+
+    fun promoteNoble() {
+        val cur = NOBLE_RANKS.indexOf(nobleTitle.value)
+        if (cur in 0 until NOBLE_RANKS.size - 1) {
+            nobleTitle.value = NOBLE_RANKS[cur + 1]
+            reputation.value += 50
+            addLog("公元${currentYear.value}年（${age.value}岁）：封爵【${nobleTitle.value}】！列土封侯！")
         }
     }
 
