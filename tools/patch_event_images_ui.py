@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# Rerun marker: event-images-v1
 path = Path('app/src/main/java/com/example/MainActivity.kt')
 text = path.read_text(encoding='utf-8')
 
