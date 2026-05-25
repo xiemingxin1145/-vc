@@ -674,7 +674,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 "政治",
                 60
             )
-            else -> RandomEvent(
+            7 -> RandomEvent(
                 "evt_plague",
                 "疫流天殃",
                 "郡野瘟疫四处横行。哀鸿铺野，流医皆避。百余县无一寸生息，死伤日巨。",
@@ -717,6 +717,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             37 -> RandomEvent("evt_coalition","诸侯会盟","各路诸侯相约会盟，共商天下大势，你受邀出席。","慷慨陈词，争取盟主之位（魅力检定）","低调出席，暗中联络各方（政治检定）","借故推辞，独善其身（名望稳定）","魅力",72)
             38 -> RandomEvent("evt_drought_relief","以工代赈","旱灾之年，你推行以工代赈，令灾民修缮城防道路。","全力推进（花300金，城防+道义+）","半途而废（浪费100金）","借此大力征发劳役（声望-30，得城防）","政治",62)
             39 -> RandomEvent("evt_defector_spy","降将是奸细","你收容的一名降将被证实是敌方派来的卧底。","当众处斩，以儆效尤（名望稳定，威严+）","秘密控制，利用其传递假情报（智谋检定）","以大局为重，秘密驱逐（外交+10）","智谋",65)
+            else -> RandomEvent("evt_coalition","诸侯会盟","各路诸侯相约会盟，共商天下大势，你受邀出席。","慷慨陈词，争取盟主之位（魅力检定）","低调出席，暗中联络各方（政治检定）","借故推辞，独善其身（名望稳定）","魅力",72)
             } // end when
         } // end else
         _gameState.value = GameState.EventChoice(ev) { opIndex ->
