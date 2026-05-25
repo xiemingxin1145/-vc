@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -598,11 +600,11 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                         "工匠之家" to "智谋+8，起步金220",
                         "世家子弟" to "智谋+15，政治+10"
                     )
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // 出身卡片分两行
+                    val originList2 = originList.chunked(4)
+                    originList2.forEach { rowItems ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         originList.forEach { clss ->
                             val isSelected = orig == clss
                             ElevatedCard(
