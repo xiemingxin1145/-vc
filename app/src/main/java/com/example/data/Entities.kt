@@ -8,6 +8,8 @@ data class CharacterRecord(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
     val surname: String,
+    val courtesy: String? = null,
+    val alias: String? = null,
     val gender: String,
     val birthYear: Int,
     val deathYear: Int,
