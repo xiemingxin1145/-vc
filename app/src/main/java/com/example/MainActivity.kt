@@ -1826,6 +1826,21 @@ fun EventChoiceDialog(
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                val eventImageRes = GameImageAssets.imageForEvent(event.id)
+                if (eventImageRes != null) {
+                    Image(
+                        painter = painterResource(id = eventImageRes),
+                        contentDescription = event.title,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(1.dp, Color(0xFFD4AF37).copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+
                 Text(event.description, color = Color(0xFFE5E0D8), fontSize = 14.sp, lineHeight = 20.sp)
 
                 Spacer(modifier = Modifier.height(12.dp))
