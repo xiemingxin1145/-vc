@@ -442,13 +442,10 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
     var commandPoints by remember { mutableStateOf(50) }
     var polPoints by remember { mutableStateOf(50) }
     var charismaPoints by remember { mutableStateOf(50) }
-
     var spareAllocUnits by remember { mutableStateOf(50) }
-
     var rollTalents by remember { mutableStateOf(viewModel.rollSetupTalents()) }
     val chosenTalents = remember { mutableStateListOf<String>() }
 
-    // Scroll container
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -469,10 +466,9 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Sub-Panel 1: Direct Identity Detail Customization
+            // ── 身份卡 ──
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E22))
@@ -492,7 +488,7 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                             )
                             if (courtesy.isNotEmpty()) {
                                 Text(
-                                    text = "字 · $courtesy",
+                                    text = "字·$courtesy",
                                     color = Color(0xFFD4AF37),
                                     fontSize = 13.sp
                                 )
@@ -505,7 +501,7 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Gender Switch Select Tag
+                    // 性别
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
@@ -521,9 +517,7 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                                     containerColor = if (gend == targetGender) Color(0xFF8B1A1A) else Color(0xFF2E2E34)
                                 ),
                                 shape = RoundedCornerShape(6.dp),
-                                modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .height(34.dp)
+                                modifier = Modifier.padding(horizontal = 4.dp).height(34.dp)
                             ) {
                                 Text(targetGender, fontSize = 13.sp, color = Color.White)
                             }
@@ -535,27 +529,27 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                     // 号输入
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("号: ", color = Color.Gray, fontSize = 14.sp, modifier = Modifier.width(28.dp))
-                        BasicTextField(
-                            value = viewModel.alias.value,
-                            onValueChange = { if (it.length <= 6) viewModel.alias.value = it },
-                            textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 14.sp),
-                            decorationBox = { inner ->
-                                Box(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .background(Color(0xFF2C2C30), RoundedCornerShape(6.dp))
-                                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                                ) {
-                                    if (viewModel.alias.value.isEmpty()) Text("可不填，如"卧龙"、"凤雏"", color = Color.Gray, fontSize = 13.sp)
-                                    inner()
-                                }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF2C2C30), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            if (viewModel.alias.value.isEmpty()) {
+                                Text("可不填，如卧龙、凤雏", color = Color.Gray, fontSize = 13.sp)
                             }
-                        )
+                            BasicTextField(
+                                value = viewModel.alias.value,
+                                onValueChange = { if (it.length <= 6) viewModel.alias.value = it },
+                                textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 14.sp),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Hometown Select Tag
+                    // 祖籍
                     Text("投生祖籍: ", color = Color.Gray, fontSize = 14.sp)
                     Row(
                         modifier = Modifier
@@ -579,7 +573,7 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Class Origins Select Tag
+                    // 出身
                     Text("行伍出身: ", color = Color.Gray, fontSize = 14.sp)
                     val originList = listOf(
                         "寒门庶民","破落士族","豪强子弟","商贾大富",
@@ -600,7 +594,6 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                         "工匠之家" to "智谋+8，金220",
                         "世家子弟" to "智谋+15，政治+10"
                     )
-                    // 出身：横向滚动列表
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -625,7 +618,12 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                             }
                         }
                     }
-            // Sub-Panel 2: Points Allocator Designer UI
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ── 属性点分配 ──
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E22))
@@ -638,9 +636,7 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                         Text("天资五维属性点数分配", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 15.sp)
                         Text("余积分配点: $spareAllocUnits", color = Color(0xFFD4AF37), fontWeight = FontWeight.Bold)
                     }
-
                     Spacer(modifier = Modifier.height(16.dp))
-
                     val attributes = listOf(
                         Triple("武力", martialPoints) { delta: Int -> martialPoints += delta },
                         Triple("智谋", intelPoints) { delta: Int -> intelPoints += delta },
@@ -648,45 +644,31 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                         Triple("政治", polPoints) { delta: Int -> polPoints += delta },
                         Triple("魅力", charismaPoints) { delta: Int -> charismaPoints += delta }
                     )
-
                     attributes.forEach { (label, value, updater) ->
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(label, color = Color.White, fontSize = 14.sp, modifier = Modifier.width(50.dp))
-                            
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 IconButton(
                                     onClick = {
-                                        if (value > 30) {
-                                            updater(-5)
-                                            spareAllocUnits += 5
-                                        }
+                                        if (value > 30) { updater(-5); spareAllocUnits += 5 }
                                     },
                                     modifier = Modifier.size(34.dp)
                                 ) {
                                     Text("-", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                                 }
-
                                 Text(
                                     text = "$value",
                                     color = Color(0xFFD4AF37),
                                     fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .width(40.dp)
-                                        .wrapContentWidth(Alignment.CenterHorizontally)
+                                    modifier = Modifier.width(40.dp).wrapContentWidth(Alignment.CenterHorizontally)
                                 )
-
                                 IconButton(
                                     onClick = {
-                                        if (spareAllocUnits >= 5) {
-                                            updater(5)
-                                            spareAllocUnits -= 5
-                                        }
+                                        if (spareAllocUnits >= 5) { updater(5); spareAllocUnits -= 5 }
                                     },
                                     modifier = Modifier.size(34.dp)
                                 ) {
@@ -700,7 +682,7 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Sub-Panel 3: Talents Selection Card
+            // ── 天赋选择 ──
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E22))
@@ -716,9 +698,7 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                             Icon(Icons.Default.Refresh, contentDescription = "Roll Talents", tint = Color(0xFFD4AF37))
                         }
                     }
-
                     Spacer(modifier = Modifier.height(10.dp))
-
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         rollTalents.forEach { tal ->
                             val isSelected = chosenTalents.contains(tal)
@@ -752,7 +732,6 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            // Main launch validation button
             Button(
                 onClick = {
                     viewModel.startNewGame(
@@ -764,10 +743,7 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                         selectedTalents = chosenTalents.toList()
                     )
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .navigationBarsPadding(),
+                modifier = Modifier.fillMaxWidth().height(60.dp).navigationBarsPadding(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B1A1A)),
                 shape = RoundedCornerShape(14.dp)
             ) {
@@ -776,6 +752,7 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
         }
     }
 }
+
 
 // -------------------------------------------------------------
 // SCREEN: PlayingScreen (Core Game Layout Framework with dynamic map)
