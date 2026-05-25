@@ -430,6 +430,7 @@ fun RecordItemCard(record: CharacterRecord) {
 fun BirthSetupScreen(viewModel: GameViewModel) {
     val sur by viewModel.surname.collectAsState()
     val nm by viewModel.name.collectAsState()
+    val courtesy by viewModel.courtesy.collectAsState()
     val gend by viewModel.gender.collectAsState()
     val home by viewModel.hometown.collectAsState()
     val orig by viewModel.origin.collectAsState()
@@ -480,12 +481,21 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "名讳: $sur $nm",
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            fontSize = 18.sp
-                        )
+                        Column {
+                            Text(
+                                text = "名讳: $sur $nm",
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                fontSize = 18.sp
+                            )
+                            if (courtesy.isNotEmpty()) {
+                                Text(
+                                    text = "字 · $courtesy",
+                                    color = Color(0xFFD4AF37),
+                                    fontSize = 13.sp
+                                )
+                            }
+                        }
                         IconButton(onClick = { viewModel.randomizeIdentity() }) {
                             Icon(Icons.Default.Refresh, contentDescription = "Reroll Name", tint = Color(0xFFD4AF37))
                         }
@@ -518,6 +528,29 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // 号输入
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("号: ", color = Color.Gray, fontSize = 14.sp, modifier = Modifier.width(28.dp))
+                        BasicTextField(
+                            value = viewModel.alias.value,
+                            onValueChange = { if (it.length <= 6) viewModel.alias.value = it },
+                            textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 14.sp),
+                            decorationBox = { inner ->
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .background(Color(0xFF2C2C30), RoundedCornerShape(6.dp))
+                                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                                ) {
+                                    if (viewModel.alias.value.isEmpty()) Text("可不填，如"卧龙"、"凤雏"", color = Color.Gray, fontSize = 13.sp)
+                                    inner()
+                                }
+                            }
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(12.dp))
 
                     // Hometown Select Tag
@@ -528,7 +561,7 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                             .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        listOf("幽州", "冀州", "徐州", "荆州", "凉州").forEach { prov ->
+                        listOf("幽州","冀州","并州","青州","徐州","兖州","豫州","司隶","凉州","荆州","扬州","益州","交州").forEach { prov ->
                             FilterChip(
                                 selected = home == prov,
                                 onClick = { viewModel.hometown.value = prov },
@@ -546,25 +579,44 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
 
                     // Class Origins Select Tag
                     Text("行伍出身: ", color = Color.Gray, fontSize = 14.sp)
-                    Row(
+                    val originList = listOf(
+                        "寒门庶民","破落士族","豪强子弟","商贾大富",
+                        "边军孤儿","黄巾遗民","没落宗亲","游侠少年",
+                        "县吏之家","书院弟子","工匠之家","世家子弟"
+                    )
+                    val originDesc = mapOf(
+                        "寒门庶民" to "武力+15，起步金100",
+                        "破落士族" to "智谋+10，政治+5",
+                        "豪强子弟" to "统率+10，武力+5",
+                        "商贾大富" to "魅力+10，起步金1000",
+                        "边军孤儿" to "武力+20，统率+5",
+                        "黄巾遗民" to "武力+10，魅力+5",
+                        "没落宗亲" to "政治+15，魅力+5",
+                        "游侠少年" to "武力+10，魅力+8",
+                        "县吏之家" to "政治+10，智谋+5",
+                        "书院弟子" to "智谋+20，政治+5",
+                        "工匠之家" to "智谋+8，起步金220",
+                        "世家子弟" to "智谋+15，政治+10"
+                    )
+                    FlowRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        listOf("寒门庶民", "商贾大富", "世家子弟").forEach { clss ->
+                        originList.forEach { clss ->
+                            val isSelected = orig == clss
                             ElevatedCard(
                                 onClick = { viewModel.origin.value = clss },
-                                modifier = Modifier.weight(1f),
                                 colors = CardDefaults.elevatedCardColors(
-                                    containerColor = if (orig == clss) Color(0xFF8B1A1A) else Color(0xFF2C2C30)
+                                    containerColor = if (isSelected) Color(0xFF8B1A1A) else Color(0xFF2C2C30)
                                 )
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 10.dp),
-                                    contentAlignment = Alignment.Center
+                                Column(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(clss, fontSize = 13.sp, color = Color.White, fontWeight = FontWeight.SemiBold)
+                                    Text(originDesc[clss] ?: "", fontSize = 10.sp, color = Color(0xFFD4AF37))
                                 }
                             }
                         }
