@@ -587,24 +587,26 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                         "县吏之家","书院弟子","工匠之家","世家子弟"
                     )
                     val originDesc = mapOf(
-                        "寒门庶民" to "武力+15，起步金100",
+                        "寒门庶民" to "武力+15，金100",
                         "破落士族" to "智谋+10，政治+5",
                         "豪强子弟" to "统率+10，武力+5",
-                        "商贾大富" to "魅力+10，起步金1000",
+                        "商贾大富" to "魅力+10，金1000",
                         "边军孤儿" to "武力+20，统率+5",
                         "黄巾遗民" to "武力+10，魅力+5",
                         "没落宗亲" to "政治+15，魅力+5",
                         "游侠少年" to "武力+10，魅力+8",
                         "县吏之家" to "政治+10，智谋+5",
                         "书院弟子" to "智谋+20，政治+5",
-                        "工匠之家" to "智谋+8，起步金220",
+                        "工匠之家" to "智谋+8，金220",
                         "世家子弟" to "智谋+15，政治+10"
                     )
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    // 出身卡片分两行
-                    val originList2 = originList.chunked(4)
-                    originList2.forEach { rowItems ->
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // 出身：横向滚动列表
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         originList.forEach { clss ->
                             val isSelected = orig == clss
                             ElevatedCard(
@@ -623,11 +625,6 @@ fun BirthSetupScreen(viewModel: GameViewModel) {
                             }
                         }
                     }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             // Sub-Panel 2: Points Allocator Designer UI
             Card(
                 modifier = Modifier.fillMaxWidth(),
