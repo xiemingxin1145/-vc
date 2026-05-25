@@ -574,7 +574,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 reputation = reputation.value,
                 currentFaction = currentFaction.value
             )
-        } else when (Random.nextInt(8)) {
+        } else {
+            // 30%概率触发图文premium事件
+            val premiumRoll = Random.nextInt(10)
+            if (premiumRoll < 3 && SanguoContentPack.premiumEvents.isNotEmpty()) {
+                SanguoContentPack.premiumEvents.random().event
+            } else when (Random.nextInt(8)) {
             0 -> RandomEvent(
                 "evt_bandit",
                 "剪径山贼",
@@ -657,6 +662,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
 
+            } // end when
+        } // end else
         _gameState.value = GameState.EventChoice(ev) { opIndex ->
             handleEventOutcome(ev, opIndex)
         }
