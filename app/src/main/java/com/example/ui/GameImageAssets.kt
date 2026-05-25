@@ -5,6 +5,7 @@ import com.example.R
 /**
  * 三国人生模拟器图像资源索引。
  * 当前已接入天下地图；头像和战场图会继续分批补入。
+ * build trigger: visual-pack-v1-map
  */
 object GameImageAssets {
     object Maps {
